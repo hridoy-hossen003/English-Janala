@@ -10,6 +10,16 @@ const loadData = async () => {
 };
 
 /* ======================================================
+   Add pronounciation to the words
+====================================================== */
+
+function pronounceWord(word) {
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = "en-EN",  // English
+  window.speechSynthesis.speak(utterance);
+}
+
+/* ======================================================
    Remove 'active' class from all lesson buttons
 ====================================================== */
 const removeActive = () => {
@@ -21,7 +31,7 @@ const removeActive = () => {
    Load words of a specific lesson by lesson ID
 ====================================================== */
 const loadLessonWords = async (id) => {
-  manageSpnnier(true);  //start loader....
+  manageSpnnier(true); //start loader....
   const url = `https://openapi.programming-hero.com/api/level/${id}`;
   const res = await fetch(url);
   const data = await res.json();
@@ -99,7 +109,6 @@ const manageSpnnier = (stutes) => {
    Display all words of a lesson
 ====================================================== */
 const displayLessons = (datas) => {
-
   const wordsContainer = document.getElementById("words-container");
   wordsContainer.innerHTML = null;
   if (datas.length === 0) {
@@ -139,7 +148,7 @@ const displayLessons = (datas) => {
             <i class="fa-solid fa-circle-info"></i>
           </button>
 
-          <button class="btn bg-[#1A91FF10] hover:bg-[#1A91FF80]">
+          <button onclick="pronounceWord('${word.word}')" class="btn bg-[#1A91FF10] hover:bg-[#1A91FF80]">
             <i class="fa-solid fa-volume-high"></i>
           </button>
         </div>
@@ -187,3 +196,21 @@ const displayData = (levels) => {
    Initial call
 ====================================================== */
 loadData();
+
+/* ======================================================
+   Implement Search Feacher
+====================================================== */
+document.getElementById("btn-search").addEventListener("click", () => {
+ const search =  document.getElementById("input-search");
+ const inputValue = search.value.trim().toLowerCase();
+ manageSpnnier(true)
+ fetch("https://openapi.programming-hero.com/api/words/all")
+ .then(res => res.json())
+ .then(data => {
+  const allWords = data.data;
+  const filteredWord = allWords.filter(word => word.word.toLowerCase().includes(inputValue))
+  displayLessons(filteredWord);
+});
+
+removeActive()
+});
